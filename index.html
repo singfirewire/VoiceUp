@@ -19,11 +19,13 @@
             padding: 20px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }
 
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
         }
 
         #commentForm {
@@ -38,6 +40,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             resize: none;
+            margin-bottom: 10px;
         }
 
         button {
@@ -57,19 +60,28 @@
         }
 
         .comment {
-            background-color: #f9f9f9;
+            background-color: #fff;
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .comment .text {
             flex: 1;
-            margin-right: 10px;
+            margin-right: 15px;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .comment .like-section {
+            display: flex;
+            align-items: center;
         }
 
         .comment .like-btn {
@@ -77,22 +89,24 @@
             border: none;
             cursor: pointer;
             font-size: 20px;
-            color: #ff6b6b; /* สีแดงสำหรับหัวใจ */
+            color: #ff6b6b;
             transition: color 0.3s;
+            margin-left: 10px;
         }
 
         .comment .like-btn:hover {
-            color: #ff3b3b; /* สีแดงเข้มเมื่อโฮเวอร์ */
+            color: #ff3b3b;
         }
 
         .comment .likes-count {
-            margin-left: 5px;
+            font-size: 14px;
             color: #555;
+            margin-left: 5px;
         }
 
         @media (max-width: 600px) {
             .container {
-                padding: 10px;
+                padding: 15px;
             }
 
             h1 {
@@ -109,6 +123,10 @@
 
             .comment {
                 padding: 10px;
+            }
+
+            .comment .text {
+                font-size: 14px;
             }
 
             .comment .like-btn {
@@ -196,6 +214,9 @@
                 commentText.className = 'text';
                 commentText.textContent = comment.text;
 
+                const likeSection = document.createElement('div');
+                likeSection.className = 'like-section';
+
                 const likeButton = document.createElement('button');
                 likeButton.className = 'like-btn';
                 likeButton.innerHTML = '<i class="fas fa-heart"></i>'; // ไอคอนรูปหัวใจสีแดง
@@ -209,9 +230,11 @@
                 likesCount.className = 'likes-count';
                 likesCount.textContent = comment.likes;
 
+                likeSection.appendChild(likeButton);
+                likeSection.appendChild(likesCount);
+
                 commentDiv.appendChild(commentText);
-                commentDiv.appendChild(likeButton);
-                commentDiv.appendChild(likesCount);
+                commentDiv.appendChild(likeSection);
                 commentsSection.appendChild(commentDiv);
             });
         });
