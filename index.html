@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เว็บรับความเห็น</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,19 +62,22 @@
             margin-bottom: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .comment .like-btn {
-            background-color: #007bff;
-            color: #fff;
+            background: none;
             border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
             cursor: pointer;
+            font-size: 20px;
+            color: #ccc;
+            transition: color 0.3s;
         }
 
-        .comment .like-btn:hover {
-            background-color: #0056b3;
+        .comment .like-btn.liked {
+            color: #ff6b6b;
         }
 
         .comment .likes-count {
@@ -103,8 +107,7 @@
             }
 
             .comment .like-btn {
-                padding: 3px 6px;
-                font-size: 12px;
+                font-size: 18px;
             }
 
             .comment .likes-count {
@@ -136,7 +139,7 @@
             authDomain: "eventcost-pro.firebaseapp.com",
             databaseURL: "https://eventcost-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "eventcost-pro",
-            storageBucket: "eventcost-pro.firebasestorage.app",
+            storageBucket: "eventcost-pro.appspot.com",
             messagingSenderId: "114353067568",
             appId: "1:114353067568:web:1b444a5cb44d0f73e8bff5"
         };
@@ -189,7 +192,7 @@
 
                 const likeButton = document.createElement('button');
                 likeButton.className = 'like-btn';
-                likeButton.textContent = 'ถูกใจ';
+                likeButton.innerHTML = '<i class="far fa-heart"></i>'; // ไอคอนรูปหัวใจ
                 likeButton.addEventListener('click', () => {
                     update(ref(database, `comments/${comment.id}`), {
                         likes: comment.likes + 1
