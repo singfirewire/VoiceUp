@@ -17,7 +17,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px; /* ปรับขนาดให้ใหญ่ขึ้นสำหรับ Desktop */
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
@@ -142,6 +142,7 @@
             margin-top: auto;
         }
 
+        /* Responsive Design for Mobile */
         @media (max-width: 600px) {
             .container {
                 padding: 15px;
@@ -173,6 +174,61 @@
 
             .comment .likes-count {
                 font-size: 12px;
+            }
+        }
+
+        /* Responsive Design for Desktop */
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 90%; /* ปรับขนาดให้เต็มจอ */
+                padding: 40px; /* เพิ่มระยะห่าง */
+            }
+
+            h1 {
+                font-size: 36px; /* ปรับขนาดหัวข้อให้ใหญ่ขึ้น */
+                margin-bottom: 30px;
+            }
+
+            .stats {
+                padding: 20px;
+            }
+
+            .stat-item .value {
+                font-size: 32px; /* ปรับขนาดตัวเลขสถิติให้ใหญ่ขึ้น */
+            }
+
+            .stat-item .label {
+                font-size: 16px; /* ปรับขนาดข้อความสถิติให้ใหญ่ขึ้น */
+            }
+
+            #commentInput {
+                height: 150px; /* ปรับขนาดช่องเขียนความเห็นให้ใหญ่ขึ้น */
+                font-size: 18px;
+            }
+
+            button {
+                font-size: 18px;
+                padding: 15px;
+            }
+
+            .comment {
+                padding: 20px;
+            }
+
+            .comment .text {
+                font-size: 18px; /* ปรับขนาดข้อความความเห็นให้ใหญ่ขึ้น */
+            }
+
+            .comment .like-btn {
+                font-size: 24px; /* ปรับขนาดไอคอนหัวใจให้ใหญ่ขึ้น */
+            }
+
+            .comment .likes-count {
+                font-size: 16px; /* ปรับขนาดจำนวนถูกใจให้ใหญ่ขึ้น */
+            }
+
+            footer {
+                font-size: 14px; /* ปรับขนาดข้อความ footer ให้ใหญ่ขึ้น */
             }
         }
     </style>
