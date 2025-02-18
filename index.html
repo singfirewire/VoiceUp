@@ -67,21 +67,26 @@
             align-items: center;
         }
 
+        .comment .text {
+            flex: 1;
+            margin-right: 10px;
+        }
+
         .comment .like-btn {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 20px;
-            color: #ccc;
+            color: #ff6b6b; /* สีแดงสำหรับหัวใจ */
             transition: color 0.3s;
         }
 
-        .comment .like-btn.liked {
-            color: #ff6b6b;
+        .comment .like-btn:hover {
+            color: #ff3b3b; /* สีแดงเข้มเมื่อโฮเวอร์ */
         }
 
         .comment .likes-count {
-            margin-left: 10px;
+            margin-left: 5px;
             color: #555;
         }
 
@@ -187,12 +192,13 @@
                 const commentDiv = document.createElement('div');
                 commentDiv.className = 'comment';
 
-                const commentText = document.createElement('p');
+                const commentText = document.createElement('div');
+                commentText.className = 'text';
                 commentText.textContent = comment.text;
 
                 const likeButton = document.createElement('button');
                 likeButton.className = 'like-btn';
-                likeButton.innerHTML = '<i class="far fa-heart"></i>'; // ไอคอนรูปหัวใจ
+                likeButton.innerHTML = '<i class="fas fa-heart"></i>'; // ไอคอนรูปหัวใจสีแดง
                 likeButton.addEventListener('click', () => {
                     update(ref(database, `comments/${comment.id}`), {
                         likes: comment.likes + 1
@@ -201,7 +207,7 @@
 
                 const likesCount = document.createElement('span');
                 likesCount.className = 'likes-count';
-                likesCount.textContent = `${comment.likes} ถูกใจ`;
+                likesCount.textContent = comment.likes;
 
                 commentDiv.appendChild(commentText);
                 commentDiv.appendChild(likeButton);
