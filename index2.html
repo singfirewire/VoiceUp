@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สำรวจความคิดเห็น</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            flex: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .survey-form {
+            margin-bottom: 20px;
+        }
+
+        .survey-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+
+        .survey-form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .survey-form button:hover {
+            background-color: #218838;
+        }
+
+        .comments-section {
+            margin-bottom: 20px;
+        }
+
+        .comment {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .comment .text {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777;
+            background-color: #f4f4f4;
+            margin-top: auto;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .survey-form textarea {
+                font-size: 14px;
+            }
+
+            .survey-form button {
+                font-size: 14px;
+            }
+
+            .comment .text {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>สำรวจความคิดเห็น</h1>
+
+        <!-- ส่วนฟอร์มสำรวจ -->
+        <div class="survey-form">
+            <textarea id="surveyInput" placeholder="เขียนคำถามสำรวจของคุณที่นี่..." required></textarea>
+            <button id="postSurvey">โพสต์สำรวจ</button>
+        </div>
+
+        <!-- ส่วนแสดงความเห็น -->
+        <div class="comments-section" id="commentsSection">
+            <!-- ความเห็นจะแสดงที่นี่ -->
+        </div>
+
+        <!-- ส่วนแสดงกราฟิก -->
+        <div class="chart-container">
+            <canvas id="surveyChart"></canvas>
+        </div>
+    </div>
+
+    <footer>
+        พัฒนาโดย PINTO CREATION CO.,LTD
+    </footer>
+
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA5c5nHaw6s1X1quiybFD_zq7vB4tIfIVQ",
+            authDomain: "eventcost-pro.firebaseapp.com",
+            databaseURL: "https://eventcost-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "eventcost-pro",
+            storageBucket: "eventcost-pro.appspot.com",
+            messagingSenderId: "114353067568",
+            appId: "1:114353067568:web:1b444a5cb44d0f73e8bff5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference to the survey and comments in the database
+        const surveyRef = ref(database, 'survey');
+        const commentsRef = ref(database, 'comments');
+
+        // Post survey question
+        document.getElementById('postSurvey').addEventListener('click', function() {
+            const surveyInput = document.getElementById('surveyInput');
+            const surveyText = surveyInput.value.trim();
+
+            if (surveyText) {
+                push(surveyRef, {
+                    question: surveyText,
+                    timestamp: Date.now()
+                });
+                surveyInput.value = '';
+            }
+        });
+
+        // Display comments and update chart
+        onValue(commentsRef, (snapshot) => {
+            const commentsSection = document.getElementById('commentsSection');
+            commentsSection.innerHTML = '';
+
+            const comments = [];
+            const likesData = [];
+            snapshot.forEach((childSnapshot) => {
+                const comment = childSnapshot.val();
+                comment.id = childSnapshot.key;
+                comments.push(comment);
+                likesData.push(comment.likes || 0);
+            });
+
+            // Render comments
+            comments.forEach((comment) => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+
+                const commentText = document.createElement('div');
+                commentText.className = 'text';
+                commentText.textContent = comment.text;
+
+                commentDiv.appendChild(commentText);
+                commentsSection.appendChild(commentDiv);
+            });
+
+            // Update chart
+            updateChart(likesData);
+        });
+
+        // Initialize Chart.js
+        const ctx = document.getElementById('surveyChart').getContext('2d');
+        const surveyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [], // ป้ายชื่อความเห็น
+                datasets: [{
+                    label: 'จำนวนถูกใจ',
+                    data: [], // ข้อมูลจำนวนถูกใจ
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Function to update chart
+        function updateChart(likesData) {
+            surveyChart.data.labels = likesData.map((_, index) => `ความเห็นที่ ${index + 1}`);
+            surveyChart.data.datasets[0].data = likesData;
+            surveyChart.update();
+        }
+    </script>
+</body>
+</html>
