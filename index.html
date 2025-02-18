@@ -213,7 +213,7 @@
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, set, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -232,7 +232,21 @@
 
         // Reference to the comments and stats in the database
         const commentsRef = ref(database, 'comments');
-        const statsRef = ref(database, 'stats');
+        const onlineUsersRef = ref(database, 'onlineUsers');
+
+        // เพิ่มผู้ใช้เข้าไปในรายการคนออนไลน์
+        const userRef = ref(database, `onlineUsers/${Date.now()}`);
+        set(userRef, true);
+
+        // ลบผู้ใช้ออกจากรายการเมื่อผู้ใช้ออกจากหน้าเว็บ
+        onDisconnect(userRef).remove();
+
+        // อัปเดตจำนวนคนออนไลน์แบบ Real-time
+        onValue(onlineUsersRef, (snapshot) => {
+            const onlineUsers = snapshot.size;
+            console.log('จำนวนคนออนไลน์:', onlineUsers); // แสดงใน Console
+            document.getElementById('onlineUsers').textContent = onlineUsers;
+        });
 
         // Form submission
         document.getElementById('commentForm').addEventListener('submit', function(event) {
@@ -304,20 +318,6 @@
                 commentDiv.appendChild(likeSection);
                 commentsSection.appendChild(commentDiv);
             });
-        });
-
-        // Track online users
-        const onlineUsersRef = ref(database, 'onlineUsers');
-        const userRef = push(onlineUsersRef);
-
-        onValue(onlineUsersRef, (snapshot) => {
-            const onlineUsers = snapshot.size;
-            document.getElementById('onlineUsers').textContent = onlineUsers;
-        });
-
-        // Remove user from online list when they leave
-        window.addEventListener('beforeunload', () => {
-            remove(userRef);
         });
     </script>
 </body>
