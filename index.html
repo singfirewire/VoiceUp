@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เว็บรับความเห็น</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #commentForm {
+            margin-bottom: 20px;
+        }
+
+        #commentInput {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .comment {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .comment .like-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .comment .like-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .comment .likes-count {
+            margin-left: 10px;
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            #commentInput {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            .comment {
+                padding: 10px;
+            }
+
+            .comment .like-btn {
+                padding: 3px 6px;
+                font-size: 12px;
+            }
+
+            .comment .likes-count {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>แสดงความเห็นของคุณ</h1>
+        <form id="commentForm">
+            <textarea id="commentInput" placeholder="เขียนความเห็นของคุณที่นี่..." required></textarea>
+            <button type="submit">ส่งความเห็น</button>
+        </form>
+        <div id="commentsSection">
+            <!-- ความเห็นจะแสดงที่นี่ -->
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA5c5nHaw6s1X1quiybFD_zq7vB4tIfIVQ",
+            authDomain: "eventcost-pro.firebaseapp.com",
+            databaseURL: "https://eventcost-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "eventcost-pro",
+            storageBucket: "eventcost-pro.firebasestorage.app",
+            messagingSenderId: "114353067568",
+            appId: "1:114353067568:web:1b444a5cb44d0f73e8bff5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference to the comments in the database
+        const commentsRef = ref(database, 'comments');
+
+        // Form submission
+        document.getElementById('commentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const commentInput = document.getElementById('commentInput');
+            const commentText = commentInput.value.trim();
+
+            if (commentText) {
+                // Push comment to Firebase
+                push(commentsRef, {
+                    text: commentText,
+                    likes: 0
+                });
+                commentInput.value = '';
+            }
+        });
+
+        // Display comments from Firebase
+        onValue(commentsRef, (snapshot) => {
+            const commentsSection = document.getElementById('commentsSection');
+            commentsSection.innerHTML = '';
+
+            const comments = [];
+            snapshot.forEach((childSnapshot) => {
+                const comment = childSnapshot.val();
+                comment.id = childSnapshot.key;
+                comments.push(comment);
+            });
+
+            // Sort comments by likes (descending)
+            comments.sort((a, b) => b.likes - a.likes);
+
+            // Render comments
+            comments.forEach((comment) => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+
+                const commentText = document.createElement('p');
+                commentText.textContent = comment.text;
+
+                const likeButton = document.createElement('button');
+                likeButton.className = 'like-btn';
+                likeButton.textContent = 'ถูกใจ';
+                likeButton.addEventListener('click', () => {
+                    update(ref(database, `comments/${comment.id}`), {
+                        likes: comment.likes + 1
+                    });
+                });
+
+                const likesCount = document.createElement('span');
+                likesCount.className = 'likes-count';
+                likesCount.textContent = `${comment.likes} ถูกใจ`;
+
+                commentDiv.appendChild(commentText);
+                commentDiv.appendChild(likeButton);
+                commentDiv.appendChild(likesCount);
+                commentsSection.appendChild(commentDiv);
+            });
+        });
+    </script>
+</body>
+</html>
