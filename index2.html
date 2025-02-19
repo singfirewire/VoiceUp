@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สำรวจความคิดเห็น</title>
+    <title>สำรวจความคิดเห็นและอารมณ์</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: background-color 0.5s ease;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             flex: 1;
@@ -31,6 +31,35 @@
             text-align: center;
             color: #333;
             margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .tab-button.active {
+            background-color: #218838;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .survey-form {
@@ -90,12 +119,56 @@
             border: 1px solid #ddd;
         }
 
+        .emotion-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .emotion-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .emotion-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        .emotion-buttons button[data-emotion="happy"] {
+            background-color: #4caf50;
+            color: #fff;
+        }
+
+        .emotion-buttons button[data-emotion="sad"] {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+        .emotion-buttons button[data-emotion="hungry"] {
+            background-color: #ff9800;
+            color: #fff;
+        }
+
+        .emotion-buttons button[data-emotion="sleepy"] {
+            background-color: #9c27b0;
+            color: #fff;
+        }
+
+        .emotion-buttons button[data-emotion="other"] {
+            background-color: #607d8b;
+            color: #fff;
+        }
+
         footer {
             text-align: center;
             padding: 10px;
             font-size: 12px;
             color: #777;
-            background-color: #f4f4f4;
+            background-color: rgba(255, 255, 255, 0.9);
             margin-top: auto;
         }
 
@@ -124,22 +197,43 @@
 </head>
 <body>
     <div class="container">
-        <h1>สำรวจความคิดเห็น</h1>
+        <h1>สำรวจความคิดเห็นและอารมณ์</h1>
 
-        <!-- ส่วนฟอร์มสำรวจ -->
-        <div class="survey-form">
-            <textarea id="surveyInput" placeholder="เขียนคำถามสำรวจของคุณที่นี่..." required></textarea>
-            <button id="postSurvey">โพสต์สำรวจ</button>
+        <!-- แท็บ -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="survey">สำรวจความคิดเห็น</button>
+            <button class="tab-button" data-tab="emotion">สำรวจอารมณ์</button>
         </div>
 
-        <!-- ส่วนแสดงความเห็น -->
-        <div class="comments-section" id="commentsSection">
-            <!-- ความเห็นจะแสดงที่นี่ -->
+        <!-- แท็บ 1: สำรวจความคิดเห็น -->
+        <div class="tab-content active" id="survey">
+            <div class="survey-form">
+                <textarea id="surveyInput" placeholder="เขียนคำถามสำรวจของคุณที่นี่..." required></textarea>
+                <button id="postSurvey">โพสต์สำรวจ</button>
+            </div>
+
+            <div class="comments-section" id="commentsSection">
+                <!-- ความเห็นจะแสดงที่นี่ -->
+            </div>
+
+            <div class="chart-container">
+                <canvas id="surveyChart"></canvas>
+            </div>
         </div>
 
-        <!-- ส่วนแสดงกราฟิก -->
-        <div class="chart-container">
-            <canvas id="surveyChart"></canvas>
+        <!-- แท็บ 2: สำรวจอารมณ์ -->
+        <div class="tab-content" id="emotion">
+            <div class="emotion-buttons">
+                <button data-emotion="happy">มีความสุข 😊</button>
+                <button data-emotion="sad">เศร้าใจ 😢</button>
+                <button data-emotion="hungry">หิว 🍔</button>
+                <button data-emotion="sleepy">ง่วง 😴</button>
+                <button data-emotion="other">อื่นๆ 🤔</button>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="emotionChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -167,9 +261,24 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Reference to the survey and comments in the database
+        // Reference to the survey, comments, and emotions in the database
         const surveyRef = ref(database, 'survey');
         const commentsRef = ref(database, 'comments');
+        const emotionsRef = ref(database, 'emotions');
+
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.getAttribute('data-tab');
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                button.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+            });
+        });
 
         // Post survey question
         document.getElementById('postSurvey').addEventListener('click', function() {
@@ -216,7 +325,52 @@
             updateChart(likesData);
         });
 
-        // Initialize Chart.js
+        // Emotion voting
+        const emotionButtons = document.querySelectorAll('.emotion-buttons button');
+        emotionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const emotion = button.getAttribute('data-emotion');
+                push(emotionsRef, {
+                    emotion: emotion,
+                    timestamp: Date.now()
+                });
+            });
+        });
+
+        // Track emotions and update background
+        onValue(emotionsRef, (snapshot) => {
+            const emotions = [];
+            snapshot.forEach((childSnapshot) => {
+                const emotion = childSnapshot.val().emotion;
+                emotions.push(emotion);
+            });
+
+            // Calculate average emotion
+            const emotionScores = {
+                happy: 1,
+                sad: -1,
+                hungry: 0,
+                sleepy: 0,
+                other: 0
+            };
+
+            const totalScore = emotions.reduce((sum, emotion) => sum + (emotionScores[emotion] || 0), 0);
+            const averageScore = totalScore / emotions.length;
+
+            // Update background color
+            if (averageScore > 0) {
+                document.body.style.backgroundColor = 'rgba(76, 175, 80, 0.1)'; // เขียว
+            } else if (averageScore < 0) {
+                document.body.style.backgroundColor = 'rgba(244, 67, 54, 0.1)'; // แดง
+            } else {
+                document.body.style.backgroundColor = '#f4f4f4'; // กลาง
+            }
+
+            // Update emotion chart
+            updateEmotionChart(emotions);
+        });
+
+        // Initialize Chart.js for survey
         const ctx = document.getElementById('surveyChart').getContext('2d');
         const surveyChart = new Chart(ctx, {
             type: 'bar',
@@ -239,11 +393,70 @@
             }
         });
 
-        // Function to update chart
+        // Function to update survey chart
         function updateChart(likesData) {
             surveyChart.data.labels = likesData.map((_, index) => `ความเห็นที่ ${index + 1}`);
             surveyChart.data.datasets[0].data = likesData;
             surveyChart.update();
+        }
+
+        // Initialize Chart.js for emotions
+        const emotionCtx = document.getElementById('emotionChart').getContext('2d');
+        const emotionChart = new Chart(emotionCtx, {
+            type: 'pie',
+            data: {
+                labels: ['มีความสุข', 'เศร้าใจ', 'หิว', 'ง่วง', 'อื่นๆ'],
+                datasets: [{
+                    label: 'จำนวนโหวต',
+                    data: [0, 0, 0, 0, 0], // ข้อมูลจำนวนโหวต
+                    backgroundColor: [
+                        '#4caf50', // เขียว
+                        '#f44336', // แดง
+                        '#ff9800', // ส้ม
+                        '#9c27b0', // ม่วง
+                        '#607d8b'  // เทา
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'ผลสำรวจอารมณ์'
+                    }
+                }
+            }
+        });
+
+        // Function to update emotion chart
+        function updateEmotionChart(emotions) {
+            const emotionCounts = {
+                happy: 0,
+                sad: 0,
+                hungry: 0,
+                sleepy: 0,
+                other: 0
+            };
+
+            emotions.forEach(emotion => {
+                if (emotionCounts.hasOwnProperty(emotion)) {
+                    emotionCounts[emotion]++;
+                }
+            });
+
+            emotionChart.data.datasets[0].data = [
+                emotionCounts.happy,
+                emotionCounts.sad,
+                emotionCounts.hungry,
+                emotionCounts.sleepy,
+                emotionCounts.other
+            ];
+            emotionChart.update();
         }
     </script>
 </body>
