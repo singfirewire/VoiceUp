@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สำรวจความคิดเห็น</title>
+    <title>เว็บรับความเห็นและสำรวจอารมณ์</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: background-color 0.5s ease;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             flex: 1;
@@ -33,11 +32,65 @@
             margin-bottom: 20px;
         }
 
-        .survey-form {
+        .tabs {
+            display: flex;
+            justify-content: center;
             margin-bottom: 20px;
         }
 
-        .survey-form textarea {
+        .tab-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .tab-button.active {
+            background-color: #218838;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .stat-item .label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        #commentForm {
+            margin-bottom: 20px;
+        }
+
+        #commentInput {
             width: 100%;
             height: 100px;
             padding: 10px;
@@ -48,7 +101,7 @@
             margin-bottom: 10px;
         }
 
-        .survey-form button {
+        button {
             display: block;
             width: 100%;
             padding: 10px;
@@ -60,34 +113,87 @@
             cursor: pointer;
         }
 
-        .survey-form button:hover {
+        button:hover {
             background-color: #218838;
         }
 
-        .comments-section {
-            margin-bottom: 20px;
-        }
-
         .comment {
-            background-color: #f9f9f9;
+            background-color: #fff;
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .comment .text {
+            flex: 1;
+            margin-right: 15px;
             font-size: 16px;
             color: #333;
             line-height: 1.5;
         }
 
-        .chart-container {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 20px;
+        .comment .like-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .comment .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #ff6b6b;
+            transition: color 0.3s;
+            margin-left: 10px;
+        }
+
+        .comment .like-btn:hover {
+            color: #ff3b3b;
+        }
+
+        .comment .likes-count {
+            font-size: 14px;
+            color: #555;
+            margin-left: 5px;
+        }
+
+        .emotion-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .emotion-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
             border-radius: 5px;
-            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .emotion-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        .emotion-buttons button.positive {
+            background-color: #4caf50;
+            color: #fff;
+        }
+
+        .emotion-buttons button.negative {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+        .emotion-buttons button.neutral {
+            background-color: #ffeb3b;
+            color: #000;
         }
 
         footer {
@@ -95,7 +201,7 @@
             padding: 10px;
             font-size: 12px;
             color: #777;
-            background-color: #f4f4f4;
+            background-color: rgba(255, 255, 255, 0.9);
             margin-top: auto;
         }
 
@@ -108,38 +214,85 @@
                 font-size: 24px;
             }
 
-            .survey-form textarea {
+            #commentInput {
                 font-size: 14px;
             }
 
-            .survey-form button {
+            button {
                 font-size: 14px;
+            }
+
+            .comment {
+                padding: 10px;
             }
 
             .comment .text {
                 font-size: 14px;
+            }
+
+            .comment .like-btn {
+                font-size: 18px;
+            }
+
+            .comment .likes-count {
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>สำรวจความคิดเห็น</h1>
+        <h1>เว็บรับความเห็นและสำรวจอารมณ์</h1>
 
-        <!-- ส่วนฟอร์มสำรวจ -->
-        <div class="survey-form">
-            <textarea id="surveyInput" placeholder="เขียนคำถามสำรวจของคุณที่นี่..." required></textarea>
-            <button id="postSurvey">โพสต์สำรวจ</button>
+        <!-- แท็บเมนู -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="tab1">ความเห็น</button>
+            <button class="tab-button" data-tab="tab2">สำรวจอารมณ์</button>
         </div>
 
-        <!-- ส่วนแสดงความเห็น -->
-        <div class="comments-section" id="commentsSection">
-            <!-- ความเห็นจะแสดงที่นี่ -->
+        <!-- แท็บที่ 1: ความเห็น -->
+        <div id="tab1" class="tab-content active">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="value" id="totalComments">0</div>
+                    <div class="label">ความเห็นทั้งหมด</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value" id="totalLikes">0</div>
+                    <div class="label">ถูกใจทั้งหมด</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value" id="onlineUsers">0</div>
+                    <div class="label">คนออนไลน์</div>
+                </div>
+            </div>
+
+            <form id="commentForm">
+                <textarea id="commentInput" placeholder="เขียนความเห็นของคุณที่นี่..." required></textarea>
+                <button type="submit">ส่งความเห็น</button>
+            </form>
+            <div id="commentsSection">
+                <!-- ความเห็นจะแสดงที่นี่ -->
+            </div>
         </div>
 
-        <!-- ส่วนแสดงกราฟิก -->
-        <div class="chart-container">
-            <canvas id="surveyChart"></canvas>
+        <!-- แท็บที่ 2: สำรวจอารมณ์ -->
+        <div id="tab2" class="tab-content">
+            <div class="emotion-buttons">
+                <button class="positive" data-emotion="1">รู้สึกดี</button>
+                <button class="neutral" data-emotion="0">ปกติ</button>
+                <button class="negative" data-emotion="-1">รู้สึกแย่</button>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="value" id="totalVotes">0</div>
+                    <div class="label">โหวตทั้งหมด</div>
+                </div>
+                <div class="stat-item">
+                    <div class="value" id="averageEmotion">0</div>
+                    <div class="label">ค่าเฉลี่ยอารมณ์</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -150,7 +303,7 @@
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, set, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -167,37 +320,60 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Reference to the survey and comments in the database
-        const surveyRef = ref(database, 'survey');
+        // Reference to the comments, online users, and emotions in the database
         const commentsRef = ref(database, 'comments');
+        const onlineUsersRef = ref(database, 'onlineUsers');
+        const emotionsRef = ref(database, 'emotions');
 
-        // Post survey question
-        document.getElementById('postSurvey').addEventListener('click', function() {
-            const surveyInput = document.getElementById('surveyInput');
-            const surveyText = surveyInput.value.trim();
+        // เพิ่มผู้ใช้เข้าไปในรายการคนออนไลน์
+        const userRef = ref(database, `onlineUsers/${Date.now()}`);
+        set(userRef, true);
 
-            if (surveyText) {
-                push(surveyRef, {
-                    question: surveyText,
+        // ลบผู้ใช้ออกจากรายการเมื่อผู้ใช้ออกจากหน้าเว็บ
+        onDisconnect(userRef).remove();
+
+        // อัปเดตจำนวนคนออนไลน์แบบ Real-time
+        onValue(onlineUsersRef, (snapshot) => {
+            const onlineUsers = snapshot.size;
+            document.getElementById('onlineUsers').textContent = onlineUsers;
+        });
+
+        // Form submission for comments
+        document.getElementById('commentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const commentInput = document.getElementById('commentInput');
+            const commentText = commentInput.value.trim();
+
+            if (commentText) {
+                push(commentsRef, {
+                    text: commentText,
+                    likes: 0,
                     timestamp: Date.now()
                 });
-                surveyInput.value = '';
+                commentInput.value = '';
             }
         });
 
-        // Display comments and update chart
+        // Display comments from Firebase
         onValue(commentsRef, (snapshot) => {
             const commentsSection = document.getElementById('commentsSection');
             commentsSection.innerHTML = '';
 
             const comments = [];
-            const likesData = [];
+            let totalLikes = 0;
             snapshot.forEach((childSnapshot) => {
                 const comment = childSnapshot.val();
                 comment.id = childSnapshot.key;
                 comments.push(comment);
-                likesData.push(comment.likes || 0);
+                totalLikes += comment.likes;
             });
+
+            // Update total comments and likes
+            document.getElementById('totalComments').textContent = comments.length;
+            document.getElementById('totalLikes').textContent = totalLikes;
+
+            // Sort comments by likes (descending)
+            comments.sort((a, b) => b.likes - a.likes);
 
             // Render comments
             comments.forEach((comment) => {
@@ -208,43 +384,82 @@
                 commentText.className = 'text';
                 commentText.textContent = comment.text;
 
+                const likeSection = document.createElement('div');
+                likeSection.className = 'like-section';
+
+                const likeButton = document.createElement('button');
+                likeButton.className = 'like-btn';
+                likeButton.innerHTML = '<i class="fas fa-heart"></i>'; // ไอคอนรูปหัวใจสีแดง
+                likeButton.addEventListener('click', () => {
+                    update(ref(database, `comments/${comment.id}`), {
+                        likes: comment.likes + 1
+                    });
+                });
+
+                const likesCount = document.createElement('span');
+                likesCount.className = 'likes-count';
+                likesCount.textContent = comment.likes;
+
+                likeSection.appendChild(likeButton);
+                likeSection.appendChild(likesCount);
+
                 commentDiv.appendChild(commentText);
+                commentDiv.appendChild(likeSection);
                 commentsSection.appendChild(commentDiv);
             });
-
-            // Update chart
-            updateChart(likesData);
         });
 
-        // Initialize Chart.js
-        const ctx = document.getElementById('surveyChart').getContext('2d');
-        const surveyChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [], // ป้ายชื่อความเห็น
-                datasets: [{
-                    label: 'จำนวนถูกใจ',
-                    data: [], // ข้อมูลจำนวนถูกใจ
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+        // Emotion voting system
+        const emotionButtons = document.querySelectorAll('.emotion-buttons button');
+        emotionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const emotionValue = parseInt(button.getAttribute('data-emotion'));
+                push(emotionsRef, {
+                    emotion: emotionValue,
+                    timestamp: Date.now()
+                });
+            });
+        });
+
+        // Update emotion stats and background color
+        onValue(emotionsRef, (snapshot) => {
+            const emotions = [];
+            snapshot.forEach((childSnapshot) => {
+                const emotion = childSnapshot.val();
+                emotions.push(emotion.emotion);
+            });
+
+            const totalVotes = emotions.length;
+            const averageEmotion = totalVotes > 0 ? (emotions.reduce((a, b) => a + b, 0) / totalVotes : 0;
+
+            document.getElementById('totalVotes').textContent = totalVotes;
+            document.getElementById('averageEmotion').textContent = averageEmotion.toFixed(2);
+
+            // Change background color based on average emotion
+            if (averageEmotion > 0) {
+                document.body.style.backgroundColor = 'rgba(76, 175, 80, 0.2)'; // Green for positive
+            } else if (averageEmotion < 0) {
+                document.body.style.backgroundColor = 'rgba(244, 67, 54, 0.2)'; // Red for negative
+            } else {
+                document.body.style.backgroundColor = 'rgba(255, 235, 59, 0.2)'; // Yellow for neutral
             }
         });
 
-        // Function to update chart
-        function updateChart(likesData) {
-            surveyChart.data.labels = likesData.map((_, index) => `ความเห็นที่ ${index + 1}`);
-            surveyChart.data.datasets[0].data = likesData;
-            surveyChart.update();
-        }
+        // Tab switching functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
