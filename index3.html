@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เว็บรับความเห็น</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            flex: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .stat-item .label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        #commentForm {
+            margin-bottom: 20px;
+        }
+
+        #commentInput {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .comment {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .comment .text {
+            flex: 1;
+            margin-right: 15px;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .comment .like-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .comment .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #ff6b6b;
+            transition: color 0.3s;
+            margin-left: 10px;
+        }
+
+        .comment .like-btn:hover {
+            color: #ff3b3b;
+        }
+
+        .comment .likes-count {
+            font-size: 14px;
+            color: #555;
+            margin-left: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777;
+            background-color: #f4f4f4;
+            margin-top: auto;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            #commentInput {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            .comment {
+                padding: 10px;
+            }
+
+            .comment .text {
+                font-size: 14px;
+            }
+
+            .comment .like-btn {
+                font-size: 18px;
+            }
+
+            .comment .likes-count {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>แสดงความเห็นของคุณ</h1>
+
+        <!-- ส่วนแสดงสถิติ -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="value" id="totalComments">0</div>
+                <div class="label">ความเห็นทั้งหมด</div>
+            </div>
+            <div class="stat-item">
+                <div class="value" id="totalLikes">0</div>
+                <div class="label">ถูกใจทั้งหมด</div>
+            </div>
+            <div class="stat-item">
+                <div class="value" id="onlineUsers">0</div>
+                <div class="label">คนออนไลน์</div>
+            </div>
+        </div>
+
+        <form id="commentForm">
+            <textarea id="commentInput" placeholder="เขียนความเห็นของคุณที่นี่..." required></textarea>
+            <button type="submit">ส่งความเห็น</button>
+        </form>
+        <div id="commentsSection">
+            <!-- ความเห็นจะแสดงที่นี่ -->
+        </div>
+    </div>
+
+    <footer>
+        พัฒนาโดย PINTO CREATION CO.,LTD
+    </footer>
+
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update, set, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA5c5nHaw6s1X1quiybFD_zq7vB4tIfIVQ",
+            authDomain: "eventcost-pro.firebaseapp.com",
+            databaseURL: "https://eventcost-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "eventcost-pro",
+            storageBucket: "eventcost-pro.appspot.com",
+            messagingSenderId: "114353067568",
+            appId: "1:114353067568:web:1b444a5cb44d0f73e8bff5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Reference to the comments and stats in the database
+        const commentsRef = ref(database, 'comments');
+        const onlineUsersRef = ref(database, 'onlineUsers');
+
+        // เพิ่มผู้ใช้เข้าไปในรายการคนออนไลน์
+        const userRef = ref(database, `onlineUsers/${Date.now()}`);
+        set(userRef, true);
+
+        // ลบผู้ใช้ออกจากรายการเมื่อผู้ใช้ออกจากหน้าเว็บ
+        onDisconnect(userRef).remove();
+
+        // อัปเดตจำนวนคนออนไลน์แบบ Real-time
+        onValue(onlineUsersRef, (snapshot) => {
+            const onlineUsers = snapshot.size;
+            console.log('จำนวนคนออนไลน์:', onlineUsers); // แสดงใน Console
+            document.getElementById('onlineUsers').textContent = onlineUsers;
+        });
+
+        // Form submission
+        document.getElementById('commentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const commentInput = document.getElementById('commentInput');
+            const commentText = commentInput.value.trim();
+
+            if (commentText) {
+                // Push comment to Firebase
+                push(commentsRef, {
+                    text: commentText,
+                    likes: 0,
+                    timestamp: Date.now()
+                });
+                commentInput.value = '';
+            }
+        });
+
+        // Display comments from Firebase
+        onValue(commentsRef, (snapshot) => {
+            const commentsSection = document.getElementById('commentsSection');
+            commentsSection.innerHTML = '';
+
+            const comments = [];
+            let totalLikes = 0;
+            snapshot.forEach((childSnapshot) => {
+                const comment = childSnapshot.val();
+                comment.id = childSnapshot.key;
+                comments.push(comment);
+                totalLikes += comment.likes;
+            });
+
+            // Update total comments and likes
+            document.getElementById('totalComments').textContent = comments.length;
+            document.getElementById('totalLikes').textContent = totalLikes;
+
+            // Sort comments by likes (descending)
+            comments.sort((a, b) => b.likes - a.likes);
+
+            // Render comments
+            comments.forEach((comment) => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+
+                const commentText = document.createElement('div');
+                commentText.className = 'text';
+                commentText.textContent = comment.text;
+
+                const likeSection = document.createElement('div');
+                likeSection.className = 'like-section';
+
+                const likeButton = document.createElement('button');
+                likeButton.className = 'like-btn';
+                likeButton.innerHTML = '<i class="fas fa-heart"></i>'; // ไอคอนรูปหัวใจสีแดง
+                likeButton.addEventListener('click', () => {
+                    update(ref(database, `comments/${comment.id}`), {
+                        likes: comment.likes + 1
+                    });
+                });
+
+                const likesCount = document.createElement('span');
+                likesCount.className = 'likes-count';
+                likesCount.textContent = comment.likes;
+
+                likeSection.appendChild(likeButton);
+                likeSection.appendChild(likesCount);
+
+                commentDiv.appendChild(commentText);
+                commentDiv.appendChild(likeSection);
+                commentsSection.appendChild(commentDiv);
+            });
+        });
+    </script>
+</body>
+</html>
